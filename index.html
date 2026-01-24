@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passport Photo Print | Print Your Photos Easily</title>
+    <meta name="description" content="Print passport size photos for Bangladesh - 3R, 4R, A4 paper sizes">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" />
+                        <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2" />
+                        <path d="M6 18c0-2.5 2.5-4 6-4s6 1.5 6 4" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" />
+                    </svg>
+                    <h1>Passport Photo Print</h1>
+                </div>
+                <p class="tagline">Print your passport size photos easily</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Row 1: Country Selection + Photo Upload -->
+            <div class="row-two-cols">
+                <!-- Country Selection -->
+                <section class="card country-section">
+                    <div class="card-header">
+                        <span class="step-number">1</span>
+                        <h2>Select Country</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="select-wrapper">
+                            <select id="countrySelect" class="country-select">
+                                <option value="BD" selected>🇧🇩 Bangladesh</option>
+                            </select>
+                            <svg class="select-arrow" viewBox="0 0 24 24" fill="none">
+                                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <div class="photo-spec-info">
+                            <div class="spec-badge">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                                    <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" />
+                                </svg>
+                                <span>Photo Size: <strong>40mm × 50mm (1.6" × 2")</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Photo Upload -->
+                <section class="card upload-section">
+                    <div class="card-header">
+                        <span class="step-number">2</span>
+                        <h2>Upload & Adjust Photo</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-area" id="uploadArea">
+                            <input type="file" id="photoInput" accept="image/*" hidden>
+                            <div class="upload-placeholder" id="uploadPlaceholder">
+                                <div class="upload-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <p class="upload-text">Click to upload photo</p>
+                                <p class="upload-hint">or drag and drop here</p>
+                                <span class="upload-formats">Supported: JPG, PNG, WEBP</span>
+                            </div>
+                            <div class="preview-container" id="previewContainer" style="display: none;">
+                                <div class="passport-preview-wrapper">
+                                    <div class="preview-frame" id="previewFrame">
+                                        <div class="preview-image-container" id="previewImageContainer">
+                                            <img id="previewImage" src="" alt="Passport Photo Preview"
+                                                draggable="false">
+                                        </div>
+                                    </div>
+                                    <div class="preview-dimensions">40mm × 50mm (1.6" × 2")</div>
+                                </div>
+
+                                <!-- Zoom & Position Controls -->
+                                <div class="adjustment-controls">
+                                    <div class="control-group">
+                                        <label class="control-label">
+                                            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+                                                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" />
+                                                <path d="M21 21l-4.35-4.35M11 8v6M8 11h6" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" />
+                                            </svg>
+                                            Zoom
+                                        </label>
+                                        <div class="slider-container">
+                                            <button class="slider-btn" id="zoomOut" title="Zoom Out">−</button>
+                                            <input type="range" id="zoomSlider" min="100" max="1000" step="1"
+                                                value="100" class="slider">
+                                            <button class="slider-btn" id="zoomIn" title="Zoom In">+</button>
+                                            <span class="slider-value" id="zoomValue">100%</span>
+                                        </div>
+                                    </div>
+                                    <div class="control-row">
+                                        <div class="position-hint">Drag image to adjust position</div>
+                                        <button class="btn-reset" id="resetBtn">
+                                            <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                                                <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round" />
+                                                <path
+                                                    d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                            Reset
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button class="btn-change-photo" id="changePhotoBtn">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path
+                                            d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"
+                                            stroke="currentColor" stroke-width="2" />
+                                        <circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="2" />
+                                    </svg>
+                                    Change Photo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Row 2: Print Layouts - All 3 in same row -->
+            <section class="card layouts-section" id="layoutsSection" style="display: none;">
+                <div class="card-header">
+                    <span class="step-number">3</span>
+                    <h2>Select Print Layout</h2>
+                </div>
+                <div class="card-body">
+                    <div class="layouts-grid-row">
+                        <!-- 3R Layout -->
+                        <div class="layout-card" data-layout="3R">
+                            <div class="layout-header">
+                                <h3>3R Paper</h3>
+                                <span class="layout-info">89mm × 127mm (3.5" × 5")</span>
+                            </div>
+                            <div class="layout-preview" id="layout3R">
+                                <div class="paper-3r">
+                                    <!-- 4 photos will be placed here -->
+                                </div>
+                            </div>
+                            <div class="layout-footer">
+                                <span class="photo-count">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor"
+                                            stroke-width="2" />
+                                        <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+                                        <path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    4 Photos
+                                </span>
+                                <button class="btn-download" data-layout="3R">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 4R Layout -->
+                        <div class="layout-card" data-layout="4R">
+                            <div class="layout-header">
+                                <h3>4R Paper</h3>
+                                <span class="layout-info">102mm × 152mm (4" × 6")</span>
+                            </div>
+                            <div class="layout-preview" id="layout4R">
+                                <div class="paper-4r">
+                                    <!-- 6 photos will be placed here -->
+                                </div>
+                            </div>
+                            <div class="layout-footer">
+                                <span class="photo-count">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor"
+                                            stroke-width="2" />
+                                        <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+                                        <path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    6 Photos
+                                </span>
+                                <button class="btn-download" data-layout="4R">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- A4 Layout -->
+                        <div class="layout-card" data-layout="A4">
+                            <div class="layout-header">
+                                <h3>A4 Paper</h3>
+                                <span class="layout-info">210mm × 297mm (8.3" × 11.7")</span>
+                            </div>
+                            <div class="layout-preview" id="layoutA4">
+                                <div class="paper-a4">
+                                    <!-- 20 photos will be placed here -->
+                                </div>
+                            </div>
+                            <div class="layout-footer">
+                                <span class="photo-count">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor"
+                                            stroke-width="2" />
+                                        <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+                                        <path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    20 Photos
+                                </span>
+                                <button class="btn-download" data-layout="A4">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; <span id="currentYear"></span> <a href="https://www.royaltechbd.com/" target="_blank"
+                    style="text-decoration: none; color: inherit;">Royal Technologies</a>. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Hidden Canvas for Download -->
+    <canvas id="downloadCanvas" style="display: none;"></canvas>
+
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+</body>
+
+</html>
