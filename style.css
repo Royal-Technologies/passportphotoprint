@@ -735,30 +735,30 @@ body::before {
 }
 
 /* 4R Paper: 102mm × 152mm, Mixed Layout
-   Left Col: 3 Rotated Photos
-   Right Col: 2 Upright + 1 Stamp Photo */
+   Left Col: 2 Rotated + 1 Upright
+   Right Col: 2 Upright + 1 Rotated (right-aligned) */
 .paper-4r.layout-mixed {
     display: flex;
     flex-direction: row;
-    gap: 4px;
-    /* Gap between columns */
-    padding: 6px;
-    /* Outer padding */
+    gap: 0;
+    /* No gap between columns */
+    padding: 2px 4px;
+    /* Minimal outer padding */
     width: 136px;
     height: 203px;
     grid-template-columns: none;
     grid-template-rows: none;
-    align-items: center;
-    /* Center horizontally */
+    align-items: flex-start;
+    /* Top aligned */
     justify-content: center;
-    /* Center vertically */
+    /* Center horizontally */
 }
 
 .p4r-col-left,
 .p4r-col-right {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 0;
 }
 
 /* Left Column: Rotated Photos (50mm width x 40mm height on paper) -> 66px x 53px visually */
@@ -802,6 +802,12 @@ body::before {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+/* Right-aligned rotated photo (extends leftward) */
+.photo-wrapper-rotated.right-aligned {
+    margin-left: auto;
+    margin-right: 0;
 }
 
 /* Stamp Photo: 20mm x 25mm -> ~26px x 33px visually */

@@ -18,7 +18,6 @@ const CONFIG = {
     // Paper sizes in mm with photo counts
     paperSizes: {
         '3R': { type: 'grid', width: 89, height: 127, photos: 4, cols: 2, rows: 2 },
-        // 4R mixed layout: 5 passport (3 rotated, 2 upright) + 1 stamp
         '4R': { type: 'mixed', width: 102, height: 152 },
         'A4': { type: 'grid', width: 210, height: 297, photos: 20, cols: 4, rows: 5 }
     },
@@ -32,6 +31,7 @@ const state = {
     imageDataURL: null,
     // Zoom and position state
     zoom: 100,
+    rotation: 0, // Rotation in degrees (-180 to 180)
     offsetX: 0,
     offsetY: 0,
     isDragging: false,
@@ -60,6 +60,11 @@ const elements = {
     zoomValue: null,
     zoomIn: null,
     zoomOut: null,
+    // Rotation controls
+    rotateSlider: null,
+    rotateValue: null,
+    rotateLeft: null,
+    rotateRight: null,
     resetBtn: null
 };
 
@@ -86,6 +91,11 @@ function init() {
     elements.zoomValue = document.getElementById('zoomValue');
     elements.zoomIn = document.getElementById('zoomIn');
     elements.zoomOut = document.getElementById('zoomOut');
+    // Rotation controls
+    elements.rotateSlider = document.getElementById('rotateSlider');
+    elements.rotateValue = document.getElementById('rotateValue');
+    elements.rotateLeft = document.getElementById('rotateLeft');
+    elements.rotateRight = document.getElementById('rotateRight');
     elements.resetBtn = document.getElementById('resetBtn');
 
     setupEventListeners();
@@ -126,6 +136,12 @@ function setupEventListeners() {
     elements.zoomSlider.addEventListener('input', handleZoomChange);
     elements.zoomIn.addEventListener('click', () => adjustZoom(5));
     elements.zoomOut.addEventListener('click', () => adjustZoom(-5));
+
+    // Rotation controls
+    elements.rotateSlider.addEventListener('input', handleRotationChange);
+    elements.rotateLeft.addEventListener('click', () => adjustRotation(-0.5));
+    elements.rotateRight.addEventListener('click', () => adjustRotation(0.5));
+
     elements.resetBtn.addEventListener('click', resetAdjustments);
 
     // Drag to pan
@@ -256,10 +272,33 @@ function handleZoomChange(e) {
  */
 function adjustZoom(delta) {
     let newZoom = state.zoom + delta;
-    newZoom = Math.max(100, Math.min(1000, newZoom));
+    newZoom = Math.max(50, Math.min(1000, newZoom));
     state.zoom = newZoom;
     elements.zoomSlider.value = newZoom;
     elements.zoomValue.textContent = `${newZoom}%`;
+    applyTransform();
+    updatePaperLayouts();
+}
+
+/**
+ * Handle rotation slider change
+ */
+function handleRotationChange(e) {
+    state.rotation = parseFloat(e.target.value);
+    elements.rotateValue.textContent = `${state.rotation}°`;
+    applyTransform();
+    updatePaperLayouts();
+}
+
+/**
+ * Adjust rotation by delta
+ */
+function adjustRotation(delta) {
+    let newRotation = state.rotation + delta;
+    newRotation = Math.max(-180, Math.min(180, newRotation));
+    state.rotation = newRotation;
+    elements.rotateSlider.value = newRotation;
+    elements.rotateValue.textContent = `${newRotation}°`;
     applyTransform();
     updatePaperLayouts();
 }
@@ -269,6 +308,7 @@ function adjustZoom(delta) {
  */
 function resetAdjustments() {
     state.zoom = 100;
+    state.rotation = 0;
     state.offsetX = 0;
     state.offsetY = 0;
     if (elements.zoomSlider) {
@@ -276,6 +316,12 @@ function resetAdjustments() {
     }
     if (elements.zoomValue) {
         elements.zoomValue.textContent = '100%';
+    }
+    if (elements.rotateSlider) {
+        elements.rotateSlider.value = 0;
+    }
+    if (elements.rotateValue) {
+        elements.rotateValue.textContent = '0°';
     }
     applyTransform();
     updatePaperLayouts();
@@ -309,7 +355,8 @@ function applyTransform() {
         // No, transform-origin is center center. 
         // We just need to translate by offsetX, offsetY.
 
-        elements.previewImage.style.transform = `translate(${state.offsetX}px, ${state.offsetY}px) scale(${currentScale})`;
+        // Apply translate, rotate, and scale transforms
+        elements.previewImage.style.transform = `translate(${state.offsetX}px, ${state.offsetY}px) rotate(${state.rotation}deg) scale(${currentScale})`;
     } else if (elements.previewImage) {
         // Reset if no image
         elements.previewImage.style.transform = 'none';
@@ -473,10 +520,14 @@ function createAdjustedPhotoCanvas() {
     const panX = state.offsetX * scaleFactor;
     const panY = state.offsetY * scaleFactor;
 
-    // 4. Draw
+    // 4. User Rotation (in radians)
+    const rotationRad = state.rotation * Math.PI / 180;
+
+    // 5. Draw with all transformations
     ctx.save();
     ctx.translate(outputWidth / 2, outputHeight / 2);
     ctx.translate(panX, panY);
+    ctx.rotate(rotationRad);
     ctx.scale(currentScale, currentScale);
     ctx.drawImage(img, -img.width / 2, -img.height / 2);
     ctx.restore();
@@ -586,13 +637,17 @@ function updatePaperLayouts() {
                 paperElement.appendChild(cell);
             }
         } else if (layoutName === '4R') {
-            // Special 4R Mixed Layout
+            // Special 4R Mixed Layout - 6 photos total
+            // Left column (LEFT-ALIGNED): 2 rotated + 1 upright
+            // Right column (RIGHT-ALIGNED): 2 upright + 1 rotated
             paperElement.className = `paper-4r layout-mixed`;
 
-            // Left Column (Rotated photos)
+            // Left Column (2 Rotated + 1 Upright at bottom)
             const leftCol = document.createElement('div');
             leftCol.className = 'p4r-col-left';
-            for (let i = 0; i < 3; i++) {
+
+            // 2 Rotated photos at top
+            for (let i = 0; i < 2; i++) {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'photo-wrapper-rotated';
                 const img = document.createElement('img');
@@ -600,13 +655,21 @@ function updatePaperLayouts() {
                 wrapper.appendChild(img);
                 leftCol.appendChild(wrapper);
             }
+            // 1 Upright photo at bottom
+            const uprightWrapper = document.createElement('div');
+            uprightWrapper.className = 'photo-wrapper-normal';
+            const uprightImg = document.createElement('img');
+            uprightImg.src = adjustedDataURL;
+            uprightWrapper.appendChild(uprightImg);
+            leftCol.appendChild(uprightWrapper);
+
             paperElement.appendChild(leftCol);
 
-            // Right Column (Upright photos + Stamp)
+            // Right Column (2 Upright + 1 Rotated at bottom, right-aligned)
             const rightCol = document.createElement('div');
             rightCol.className = 'p4r-col-right';
 
-            // 2 Passport Photos
+            // 2 Upright Passport Photos at top
             for (let i = 0; i < 2; i++) {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'photo-wrapper-normal';
@@ -616,13 +679,13 @@ function updatePaperLayouts() {
                 rightCol.appendChild(wrapper);
             }
 
-            // 1 Stamp Photo
-            const stampWrapper = document.createElement('div');
-            stampWrapper.className = 'photo-wrapper-stamp';
-            const stampImg = document.createElement('img');
-            stampImg.src = adjustedDataURL;
-            stampWrapper.appendChild(stampImg);
-            rightCol.appendChild(stampWrapper);
+            // 1 Rotated Photo at bottom (right-aligned, extends leftward)
+            const rotatedWrapper = document.createElement('div');
+            rotatedWrapper.className = 'photo-wrapper-rotated right-aligned';
+            const rotatedImg = document.createElement('img');
+            rotatedImg.src = adjustedDataURL;
+            rotatedWrapper.appendChild(rotatedImg);
+            rightCol.appendChild(rotatedWrapper);
 
             paperElement.appendChild(rightCol);
         }
@@ -665,8 +728,8 @@ function downloadLayout(layoutName) {
     // Create adjusted photo canvas (Upright)
     const adjustedPhoto = createAdjustedPhotoCanvas();
 
-    // Define standard padding (2mm for single cut workflow)
-    const paddingMm = 2;
+    // Define standard padding (1.75mm)
+    const paddingMm = 1.75;
     const paddingPx = mmToPixels(paddingMm);
 
     // Helper to draw photo with white padding (Cutting Guide Style)
@@ -720,41 +783,30 @@ function downloadLayout(layoutName) {
             }
         }
     } else if (layoutName === '4R') {
-        // Custom 4R Layout
+        // Custom 4R Layout - 6 photos total
+        // Left column: 2 rotated (top) + 1 upright (bottom) - LEFT-ALIGNED
+        // Right column: 2 upright (top) + 1 rotated (bottom) - RIGHT-ALIGNED
 
-        // Total block sizes (Image + Padding)
-        // Rotated: 50mm width, 40mm height
+        // Block sizes
         const rotPhotoW = photoHeight;
         const rotPhotoH = photoWidth;
         const rotBlockW = rotPhotoW + (paddingPx * 2);
         const rotBlockH = rotPhotoH + (paddingPx * 2);
 
-        // Upright: 40mm width, 50mm height
         const normPhotoW = photoWidth;
         const normPhotoH = photoHeight;
         const normBlockW = normPhotoW + (paddingPx * 2);
         const normBlockH = normPhotoH + (paddingPx * 2);
 
-        // Stamp: 20mm width, 25mm height
-        const stampW = stampWidth;
-        const stampH = stampHeight;
-        const stampBlockW = stampW + (paddingPx * 2);
-        const stampBlockH = stampH + (paddingPx * 2);
-
-        // Gap between items/columns - Set to 0 for single cut
-        const gapPixels = 0;
-
-        // --- Calculate Layout Dimensions to Center ---
-        const leftColH = (rotBlockH * 3);
-        const rightColH = (normBlockH * 2) + stampBlockH;
-
-        const contentW = rotBlockW + gapPixels + normBlockW;
-        const contentH = Math.max(leftColH, rightColH);
+        // Layout Dimensions
+        const leftColH = (rotBlockH * 2) + normBlockH;
+        const rightColH = (normBlockH * 2) + rotBlockH;
+        const contentW = rotBlockW + normBlockW;
 
         let startX = (paperWidth - contentW) / 2;
-        let startY = (paperHeight - contentH) / 2;
+        let startY = mmToPixels(0.875); // Top margin 0.875mm
 
-        // --- Draw Left Column ---
+        // Create Rotated Canvas (counter-clockwise)
         const rotatedCanvas = document.createElement('canvas');
         rotatedCanvas.width = photoHeight;
         rotatedCanvas.height = photoWidth;
@@ -763,27 +815,31 @@ function downloadLayout(layoutName) {
         rctx.rotate(-90 * Math.PI / 180);
         rctx.drawImage(adjustedPhoto, -photoWidth / 2, -photoHeight / 2, photoWidth, photoHeight);
 
+        // LEFT COLUMN: 2 Rotated + 1 Upright
         let curX = startX;
         let curY = startY;
 
-        for (let i = 0; i < 3; i++) {
+        // 2 Rotated at top
+        for (let i = 0; i < 2; i++) {
             drawPhotoWithBorder(rotatedCanvas, curX, curY, rotPhotoW, rotPhotoH, true);
             curY += rotBlockH;
         }
+        // 1 Upright at bottom
+        drawPhotoWithBorder(adjustedPhoto, curX, curY, normPhotoW, normPhotoH);
 
-        // --- Draw Right Column ---
-        curX = startX + rotBlockW + gapPixels;
+        // RIGHT COLUMN: 2 Upright + 1 Rotated (right-aligned)
+        const rightColX = startX + rotBlockW;
         curY = startY;
 
-        // 2 Upright Photos
+        // 2 Upright at top
         for (let i = 0; i < 2; i++) {
-            drawPhotoWithBorder(adjustedPhoto, curX, curY, normPhotoW, normPhotoH);
+            drawPhotoWithBorder(adjustedPhoto, rightColX, curY, normPhotoW, normPhotoH);
             curY += normBlockH;
         }
 
-        // 1 Stamp Photo
-        const stampOffsetX = (normBlockW - stampBlockW) / 2;
-        drawPhotoWithBorder(adjustedPhoto, curX + stampOffsetX, curY, stampW, stampH);
+        // 1 Rotated at bottom (right-aligned, extends leftward)
+        const rotatedRightX = rightColX + normBlockW - rotBlockW;
+        drawPhotoWithBorder(rotatedCanvas, rotatedRightX, curY, rotPhotoW, rotPhotoH, true);
     }
 
     // Trigger download
@@ -794,6 +850,7 @@ function downloadLayout(layoutName) {
 
     showNotification(`${layoutName} layout downloaded successfully!`, 'success');
 }
+
 
 /**
  * Show notification message
