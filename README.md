@@ -34,7 +34,7 @@ A simple, fast, and secure web application to create and print passport-size pho
 
 1. Clone the repository:
    ```bash
-   git clone http://github.com/mehdiakram/passportphotoprint
+   git clone http://github.com/royal-technologies/passportphotoprint
    ```
 2. Open `index.html` in your browser.
    - Or serve using a local server like Live Server or `php -S localhost:8000`.
